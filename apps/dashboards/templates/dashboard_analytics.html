@@ -1,0 +1,658 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Dashboard - Analytics{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script id="student-chart-labels" type="application/json">{{ student_chart_labels|safe }}</script>
+<script id="student-chart-data" type="application/json">{{ student_chart_data|safe }}</script>
+<script id="orgs-labels" type="application/json">{{ organizations_labels|safe }}</script>
+<script id="orgs-counts" type="application/json">{{ organizations_counts|safe }}</script>
+<script id="programs-labels" type="application/json">{{ programs_labels|safe }}</script>
+<script id="programs-counts" type="application/json">{{ programs_counts|safe }}</script>
+<script id="college-labels" type="application/json">{{ colleges_labels|safe }}</script>
+<script id="college-counts" type="application/json">{{ colleges_counts|safe }}</script>
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+{% endblock page_js %}
+
+
+
+{% block content %}
+<div class="row gy-6">
+  <!-- Congratulations card -->
+  <div class="col-md-12 col-lg-4">
+    <div class="card" style="background: linear-gradient(135deg, #f8fafc 60%, #e0e7ef 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+      <div class="card-body text-nowrap">
+      <h4 class="card-title mb-0 flex-wrap text-nowrap">Welcome LynFromLasVegas!</h4>
+        <p class="mb-1 text-muted" style="font-size:1.1em;">Student Profile</p>
+        <p class="mb-2">Palawan State University</p>
+        <p class="mb-2">BSIT-3-B1</p>
+        <p class="mb-2">Lyn: 2020-8-0067</p>
+        <a href="javascript:;" class="btn btn-sm btn-primary">View Profile</a>
+      </div>
+      <img src="{% static 'img/illustrations/lyn.jpg' %}" class="rounded-circle border border-3 border-white shadow position-absolute bottom-0 end-0 me-12 mb-5"
+      width="90" height="90" alt="profile avatar">
+     
+    </div>
+  </div>
+  <!--/ Congratulations card -->
+
+  <!-- Transactions -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="d-flex align-items-center justify-content-between">
+          <h5 class="card-title m-0 me-2">Student Enrolles</h5>
+          <div class="dropdown">
+            <button class="btn text-muted p-0" type="button" id="transactionID" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="ri-more-2-line ri-24px"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="transactionID">
+              <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+              <a class="dropdown-item" href="javascript:void(0);">Share</a>
+              <a class="dropdown-item" href="javascript:void(0);">Update</a>
+            </div>
+          </div>
+        </div>
+        <p class="small mb-0"><span class="h6 mb-0">Total 84 students in </span> 😎 this month</p>
+      </div>
+      <div class="card-body pt-lg-10">
+        <div class="row g-6">
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-primary rounded shadow-xs">
+                  <i class="ri-pie-chart-2-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Students</p>
+                <h5 class="mb-0">{{students_count}}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-success rounded shadow-xs">
+                  <i class="ri-group-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">College</p>
+                <h5 class="mb-0">{{colleges_count}}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-warning rounded shadow-xs">
+                  <i class="ri-macbook-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Program</p>
+                <h5 class="mb-0">{{programs_count}}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-info rounded shadow-xs">
+                  <i class="ri-money-dollar-circle-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Organization</p>
+                <h5 class="mb-0">{{organizations_count}}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Transactions -->
+
+  <!-- Weekly Overview Chart -->
+    <div class="col-xl-4 col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between">
+            <h5 class="mb-1">Students</h5>
+            <div class="dropdown">
+              <button class="btn text-muted p-0" type="button" id="weeklyOverviewDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ri-more-2-line ri-24px"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="weeklyOverviewDropdown">
+                <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+                <a class="dropdown-item" href="javascript:void(0);">Share</a>
+                <a class="dropdown-item" href="javascript:void(0);">Update</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body pt-lg-2">
+          <div id="weeklyOverviewChart">
+            <canvas id="weeklyOverviewLineChart"></canvas>
+          </div>
+          <div class="mt-1 mt-md-3">
+            <div class="d-flex align-items-center gap-4">
+              <h4 class="mb-0">{{ students_count }}</h4>
+              <p class="mb-0">No. of Students Enrolled</p>
+            </div>
+            <div class="d-grid mt-3 mt-md-4">
+              <button class="btn btn-primary" type="button">Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <!--/ Weekly Overview Chart -->
+
+  <!-- Total Earnings -->
+  <div class="col-xl-4 col-md-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Favorite Subjects of Students</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="totalEarnings" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalEarnings">
+            <a class="dropdown-item" href="javascript:void(0);">Last 28 Days</a>
+            <a class="dropdown-item" href="javascript:void(0);">Last Month</a>
+            <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-lg-8">
+        <div class="mb-5 mb-lg-12">
+          <div class="d-flex align-items-center">
+            <h3 class="mb-0">{{students_count}}</h3>
+            <span class="text-success ms-2">
+              <i class="ri-arrow-up-s-line"></i>
+              <span>100%</span>
+            </span>
+          </div>
+          <p class="mb-0">Compared to 20% last year</p>
+        </div>
+        <ul class="p-0 m-0">
+          <li class="d-flex mb-6">
+            <div class="avatar flex-shrink-0 bg-lightest rounded me-3">
+              <img src="{% static 'img/icons/misc/zipcar.png' %}" alt="zipcar">
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">APDEV</h6>
+                <p class="mb-0">Django and Faker</p>
+              </div>
+              <div>
+                <h6 class="mb-2">30 students</h6>
+                <div class="progress bg-label-primary" style="height: 4px;">
+                  <div class="progress-bar bg-primary" style="width: 75%" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex mb-6">
+            <div class="avatar flex-shrink-0 bg-lightest rounded me-3">
+              <img src="{% static 'img/icons/misc/bitbank.png' %}" alt="bitbank">
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">GIS</h6>
+                <p class="mb-0">QGIS</p>
+              </div>
+              <div>
+                <h6 class="mb-2">25 Students</h6>
+                <div class="progress bg-label-info" style="height: 4px;">
+                  <div class="progress-bar bg-info" style="width: 75%" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex">
+            <div class="avatar flex-shrink-0 bg-lightest rounded me-3">
+              <img src="{% static 'img/icons/misc/aviato.png' %}" alt="aviato">
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">Advanced DataBase</h6>
+                <p class="mb-0">xampp, mysql</p>
+              </div>
+              <div>
+                <h6 class="mb-2">29 Students</h6>
+                <div class="progress bg-label-secondary" style="height: 4px;">
+                  <div class="progress-bar bg-secondary" style="width: 75%" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!--/ Total Earnings -->
+
+  <!-- Four Cards -->
+  <div class="col-xl-4 col-md-6">
+    <div class="row gy-6">
+      <!-- Total Profit line chart -->
+      <div class="col-sm-6">
+        <div class="card h-100">
+          <div class="card-header pb-0">
+            <h4 class="mb-0">{{students_count}}</h4>
+          </div>
+          <div class="card-body">
+            <div id="totalProfitLineChart" class="mb-3"></div>
+            <h6 class="text-center mb-0">Total Enrolled This Year</h6>
+          </div>
+        </div>
+      </div>
+      <!--/ Total Profit line chart -->
+      <!-- new student -->
+      <div class="col-sm-6">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="avatar">
+              <div class="avatar-initial bg-secondary rounded-circle shadow-xs">
+                <i class="ri-pie-chart-2-line ri-24px"></i>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button class="btn text-muted p-0" type="button" id="totalProfitID" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ri-more-2-line ri-24px"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalProfitID">
+                <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+                <a class="dropdown-item" href="javascript:void(0);">Share</a>
+                <a class="dropdown-item" href="javascript:void(0);">Update</a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h6 class="mb-1">New Student</h6>
+            <div class="d-flex flex-wrap mb-1 align-items-center">
+              <h4 class="mb-0 me-2">29 Students</h4>
+            </div>
+            <small>Weekly Project</small>
+          </div>
+        </div>
+      </div>
+      <!--/ Total Profit Weekly Project -->
+      <!-- New Yearly Project -->
+      <div class="col-sm-6">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="avatar">
+              <div class="avatar-initial bg-primary rounded-circle shadow-xs">
+                <i class="ri-file-word-2-line ri-24px"></i>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button class="btn text-muted p-0" type="button" id="newProjectID" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ri-more-2-line ri-24px"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="newProjectID">
+                <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+                <a class="dropdown-item" href="javascript:void(0);">Share</a>
+                <a class="dropdown-item" href="javascript:void(0);">Update</a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h6 class="mb-1">Active Programs</h6>
+            <div class="d-flex flex-wrap mb-1 align-items-center">
+              <h4 class="mb-0 me-2">8</h4>
+            </div>
+            <small>Active Programs</small>
+          </div>
+        </div>
+      </div>
+      <!--/ New Yearly Project -->
+      <!-- Student activities -->
+      <div class="col-sm-6">
+        <div class="card h-100">
+          <div class="card-header pb-0">
+            <h4 class="mb-0">8</h4>
+          </div>
+          <div class="card-body">
+            <div id="sessionsColumnChart" class="mb-3"></div>
+            <h6 class="text-center mb-0">Student Activities</h6>
+          </div>
+        </div>
+      </div>
+      <!--/ Sessions chart -->
+    </div>
+  </div>
+ 
+
+  <!-- programs in cs -->
+  <div class="col-xl-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Programs in College of Sciences</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="saleStatus" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="saleStatus">
+            <a class="dropdown-item" href="javascript:void(0);">Last 28 Days</a>
+            <a class="dropdown-item" href="javascript:void(0);">Last Month</a>
+            <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Donut chart container for Programs in College of Sciences -->
+        <div id="programsInCSChart" style="min-height: 220px;"></div>
+
+        <!-- Existing program list starts here -->
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center mb-4">
+            <div class="avatar me-4">
+              <div class="avatar-initial bg-label-success rounded-circle">US</div>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <h6 class="mb-0">ACS</h6>
+                <i class="ri-arrow-up-s-line ri-24px text-success"></i>
+                <span class="text-success">25.8%</span>
+              </div>
+              <p class="mb-0">Computer Science</p>
+            </div>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-1">894</h6>
+            <small class="text-muted">Students</small>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center mb-4">
+            <div class="avatar me-4">
+              <span class="avatar-initial bg-label-danger rounded-circle">UK</span>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <h6 class="mb-0">MARBIO</h6>
+                <i class="ri-arrow-down-s-line ri-24px text-danger"></i>
+                <span class="text-danger">6.2%</span>
+              </div>
+              <p class="mb-0">Marine Biology</p>
+            </div>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-1">645</h6>
+            <small class="text-muted">Students</small>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center mb-4">
+            <div class="avatar me-4">
+              <span class="avatar-initial bg-label-warning rounded-circle">IN</span>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <h6 class="mb-0">BSIT</h6>
+                <i class="ri-arrow-up-s-line ri-24px text-success"></i>
+                <span class="text-success"> 12.4%</span>
+              </div>
+              <p class="mb-0">Information Technology</p>
+            </div>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-1">148</h6>
+            <small class="text-muted">Students</small>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center mb-4">
+            <div class="avatar me-4">
+              <span class="avatar-initial bg-label-secondary rounded-circle">JA</span>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <h6 class="mb-0">{{colleges_count}}</h6>
+                <i class="ri-arrow-down-s-line ri-24px text-danger"></i>
+                <span class="text-danger">11.9%</span>
+              </div>
+              <p class="mb-0">Environmental Science</p>
+            </div>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-1">86</h6>
+            <small class="text-muted">Students</small>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            <div class="avatar me-4">
+              <span class="avatar-initial bg-label-danger rounded-circle">KO</span>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <h6 class="mb-0">{{colleges_count}}</h6>
+                <i class="ri-arrow-up-s-line ri-24px text-success"></i>
+                <span class="text-success">16.2%</span>
+              </div>
+              <p class="mb-0">Medical Biology</p>
+            </div>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-1">42</h6>
+            <small class="text-muted">Students</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Sales by Countries -->
+
+  <!-- Data Tables -->
+  <div class="col-12">
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th class="text-truncate">User</th>
+              <th class="text-truncate">College</th>
+              <th class="text-truncate">Role</th>
+              <th class="text-truncate">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/1.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student0.lastname}}, {{student0.firstname}} {{student0.middlename }}</h6>
+                    <small class="text-truncate">{{student0.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student0.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-vip-crown-line ri-22px text-primary me-2"></i>
+                  <span>{{ student0.created_at }}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-success rounded-pill">Active</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/3.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student1.lastname}}, {{student1.firstname}} {{student1.middlename }}</h6>
+                    <small class="text-truncate">{{student1.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student1.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-edit-box-line text-success ri-22px me-2"></i>
+                  <span>{{student1.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-success rounded-pill">Active</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/2.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student2.lastname}}, {{student2.firstname}} {{student2.middlename }}</h6>
+                    <small class="text-truncate">{{student2.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student2.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-computer-line text-danger ri-22px me-2"></i>
+                  <span>{{student2.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-success rounded-pill">Active</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/5.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student3.lastname}}, {{student3.firstname}} {{student3.middlename }}</h6>
+                    <small class="text-truncate">{{student3.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student3.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-edit-box-line text-warning ri-22px me-2"></i>
+                  <span>{{student3.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-warning rounded-pill">Pending</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/4.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student4.lastname}}, {{student4.firstname}} {{student4.middlename }}</h6>
+                    <small class="text-truncate">{{student4.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student4.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-pie-chart-2-line ri-22px text-info me-2"></i>
+                  <span>{{student4.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-success rounded-pill">Active</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/7.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student5.lastname}}, {{student5.firstname}} {{student5.middlename }}</h6>
+                    <small class="text-truncate">{{student5.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student5.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-edit-box-line text-warning ri-22px me-2"></i>
+                  <span>{{student5.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-warning rounded-pill">Pending</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/6.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student6.lastname}}, {{student6.firstname}} {{student6.middlename }}</h6>
+                    <small class="text-truncate">{{student6.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student6.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-user-3-line ri-22px text-success me-2"></i>
+                  <span>{{student6.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-success rounded-pill">Active</span></td>
+            </tr>
+            <tr class="border-transparent">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-4">
+                    <img src="{% static 'img/avatars/1.png' %}" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-truncate">{{student7.lastname}}, {{student7.firstname}} {{student7.middlename }}</h6>
+                    <small class="text-truncate">{{student7.student_id}}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="text-truncate">{{ student7.program }}</td>
+              <td class="text-truncate">
+                <div class="d-flex align-items-center">
+                  <i class="ri-user-3-line ri-22px text-success me-2"></i>
+                  <span>{{student7.created_at}}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-label-secondary rounded-pill">Inactive</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!--/ Data Tables -->
+</div>
+{% endblock %}
